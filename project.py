@@ -21,6 +21,9 @@ if __name__ == '__main__':
     airport_points = driver.Open(fname, 0)
     layer = airport_points.GetLayer(0)
 
+    extent = layer.GetExtent()
+    area = area = Extent(extent[0], extent[1], extent[2], extent[3])
+
     points = []
     for i in range(layer.GetFeatureCount()):
         feature = layer.GetFeature(i)
