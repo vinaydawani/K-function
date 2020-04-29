@@ -24,5 +24,5 @@ if __name__ == '__main__':
     points = []
     for i in range(layer.GetFeatureCount()):
         feature = layer.GetFeature(i)
-        p = layer.GetFeature(i).GetGeometryRef()
+        p = feature.GetGeometryRef()
         points.append(Point(p.GetPoint(0)[0], p.GetPoint(0)[1]))
