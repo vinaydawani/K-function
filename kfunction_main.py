@@ -135,13 +135,14 @@ if __name__ == '__main__':
 
     extent = layer.GetExtent()
     area = area = Extent(extent[0], extent[1], extent[2], extent[3])
-    density = float(len(points)) / area.area()
 
     points = []
     for i in range(layer.GetFeatureCount()):
         feature = layer.GetFeature(i)
         p = feature.GetGeometryRef()
         points.append(Point(p.GetPoint(0)[0], p.GetPoint(0)[1]))
+
+    density = float(len(points)) / area.area()
 
     plot_points(points, area)
 
