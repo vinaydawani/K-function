@@ -19,7 +19,7 @@ from spatialanalysis.kfunction import *
 parser = argparse.ArgumentParser(description="Taking number of simulations")
 parser.add_argument('-sim', '--simulations', default=100,
                     help='Number of simulations run in monte carlo function')
-args = parser.parse_args()
+args = parser.parse_args() # Number of simulations can be passed as an arguement
 
 def kfunc_vals(points, area):
     """
@@ -78,6 +78,16 @@ def kfunc_monte_carlo(n, area, radii, density, rounds=100):
     return percentiles
 
 def plot_points(pts, area):
+    """Plots the points retrieved from shapefile with help of matplotlib
+
+    Parameters
+    ----------
+    pts : list of points
+        list of points in shapefile.
+    area : list
+        area thhat includes all the points.
+
+    """
     sns.set_style('whitegrid')
     fig, ax = plt.subplots()
     x, y = [p.x for p in points], [p.y for p in points]
@@ -91,6 +101,16 @@ def plot_points(pts, area):
     plt.show()
 
 def plot_graph(percentiles, ds, lds, density):
+    """Generates a graphh depicting K-function.
+
+    Parameters
+    ----------
+    percentiles : list
+    ds : list
+    lds : list
+    density : float
+
+    """
     sns.set_style('darkgrid')
     fig, ax = plt.subplots()
     plt.plot(ds, lds, color='#c61aff', label='Airports')
@@ -101,12 +121,14 @@ def plot_graph(percentiles, ds, lds, density):
     plt.ylabel('L(d)')
     plt.legend(loc='best', fontsize=9)
     ax.set_aspect(1)
-    plt.show()    
+    plt.show()
 
 
 if __name__ == '__main__':
     driver = ogr.GetDriverByName("ESRI Shapefile")
-    fname = input("Enter complete location of Shapefile:")
+    # fname = input("Enter complete location of Shapefile:")
+    fname = '/Users/vinaydawani/Library/Mobile Documents/com~apple~CloudDocs/SP20/GEOG5222/final_project/data/airports_2.shp'
+    # Projection used: USA Contiguous Lambert Conformal Conic
 
     airport_points = driver.Open(fname, 0)
     layer = airport_points.GetLayer(0)
