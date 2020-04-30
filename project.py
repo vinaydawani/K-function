@@ -5,9 +5,10 @@ sys.path.append(
     '/Users/vinaydawani/Library/Mobile Documents/com~apple~CloudDocs/SP20/GEOG5222/gisalgs')
 import matplotlib.pyplot as plt
 import numpy as np
+import seaborn as sns
 import random
-from osgeo import ogr
 import argparse
+from osgeo import ogr
 from math import log10, ceil
 from geom.point import *
 from indexing.extent import *
@@ -77,17 +78,30 @@ def kfunc_monte_carlo(n, area, radii, density, rounds=100):
     return percentiles
 
 def plot_points(pts, area):
+    sns.set_style('whitegrid')
     fig, ax = plt.subplots()
     x, y = [p.x for p in points], [p.y for p in points]
     ax.scatter(x, y, facecolor='#006bb3', edgecolor='#99d6ff', marker='.', alpha='0.45')
     plt.xlim(extent[0]+500000, extent[1]+500000)
     plt.ylim(extent[2]-500000, extent[3]+500000)
     plt.title("Airports in North America")
-    # plt.xticks([])
-    # plt.yticks([])
-    ax.axis('off')
+    plt.xticks([])
+    plt.yticks([])
     ax.set_aspect(1)
     plt.show()
+
+def plot_graph(percentiles, ds, lds, density):
+    sns.set_style('darkgrid')
+    fig, ax = plt.subplots()
+    plt.plot(ds, lds, color='#c61aff', label='Airports')
+    plt.plot(ds, percentiles, color='#8c8c8c', linestyle='--', label='Envelope')
+    plt.plot([0, plt.xlim()[1]], [0, plt.xlim()[1]], color='#a8000d', linestyle=':',label='L(d)=d', alpha=0.7)
+    plt.title(f'K-Function ($\lambda$ = {density})')
+    plt.xlabel('Radius (d)')
+    plt.ylabel('L(d)')
+    plt.legend(loc='best', fontsize=9)
+    ax.set_aspect(1)
+    plt.show()    
 
 
 if __name__ == '__main__':
@@ -111,3 +125,5 @@ if __name__ == '__main__':
 
     ds, lds = kfunc_vals(points, area)
     percentiles = kfunc_monte_carlo(len(points), area, ds, density, rounds=int(args.simulations))
+
+    plot_graph(percentiles, ds, lds, density)
