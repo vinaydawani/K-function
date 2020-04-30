@@ -7,12 +7,74 @@ import matplotlib.pyplot as plt
 import numpy as np
 import random
 from osgeo import ogr
+import argparse
 from math import log10, ceil
 from geom.point import *
 from indexing.extent import *
 from indexing.kdtree1 import *
 from indexing.kdtree2b import *
 from spatialanalysis.kfunction import *
+
+parser = argparse.ArgumentParser(description="Taking number of simulations")
+parser.add_argument('-sim', '--simulations', default=100,
+                    help='Number of simulations run in monte carlo function')
+args = parser.parse_args()
+
+def kfunc_vals(points, area):
+    """
+    Input
+      points: a list of Point objects
+      area: an Extent object
+
+    Return
+      ds: list of radii
+      lds: L(d) values for each radius in ds
+    """
+    # This function is taken from kfunction file in spatialanalysis library
+    n = len(points)
+    density = n/area.area()
+    t = kdtree2(points)
+    d = min([area.xmax-area.xmin,area.ymax-area.ymin])*2/3/10
+    ds = [ d*(i+1) for i in range(10)]
+    lds = [0 for d in ds]
+    for i, d in enumerate(ds):
+        for p in points:
+            ld = kfunc(t, p, d, density)[1]
+            lds[i] += ld
+    lds = [ld/n for ld in lds]
+    return ds, lds
+
+def kfunc_monte_carlo(n, area, radii, density, rounds=100):
+    """
+    Input
+      n:            number of points
+      area:         Extent object defining the area
+      radii:        list containing a set of radii of circles
+      density:      density of point events in the area
+      rounds:       number of simulations
+    Return
+      percentiles:  a list of 2.5th and 97.5th percentiles
+                    for each d in radii
+    """
+    alllds = []
+    for test in range(rounds):
+        points = [ Point(random.uniform(area.xmin, area.xmax),
+                         random.uniform(area.ymin, area.ymax))
+                   for i in range(n) ]
+        t = kdtree2(points)
+        lds = [0 for d in radii]
+        for i, d in enumerate(radii):
+            for p in points:
+                ld = kfunc(t, p, d, density)[1]
+                lds[i] += ld
+        lds = [ld/n for ld in lds]
+        alllds.append(lds)
+    alllds = np.array(alllds)
+    percentiles = []
+    for i in range(len(radii)):
+        percentiles.append([np.percentile(alllds[:,i], 2.5),
+                            np.percentile(alllds[:,i], 97.5)])
+    return percentiles
 
 def plot_points(pts, area):
     fig, ax = plt.subplots()
@@ -37,6 +99,7 @@ if __name__ == '__main__':
 
     extent = layer.GetExtent()
     area = area = Extent(extent[0], extent[1], extent[2], extent[3])
+    density = float(len(points)) / area.area()
 
     points = []
     for i in range(layer.GetFeatureCount()):
@@ -45,3 +108,6 @@ if __name__ == '__main__':
         points.append(Point(p.GetPoint(0)[0], p.GetPoint(0)[1]))
 
     plot_points(points, area)
+
+    ds, lds = kfunc_vals(points, area)
+    percentiles = kfunc_monte_carlo(len(points), area, ds, density, rounds=int(args.simulations))
