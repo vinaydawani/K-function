@@ -1,8 +1,6 @@
 #!/usr/bin/env python
 # coding: utf-8
-import sys
-sys.path.append(
-    '/Users/vinaydawani/Library/Mobile Documents/com~apple~CloudDocs/SP20/GEOG5222/gisalgs')
+
 import matplotlib.pyplot as plt
 import numpy as np
 import seaborn as sns
@@ -10,11 +8,11 @@ import random
 import argparse
 from osgeo import ogr
 from math import log10, ceil
-from geom.point import *
-from indexing.extent import *
-from indexing.kdtree1 import *
-from indexing.kdtree2b import *
-from spatialanalysis.kfunction import *
+from utils.point import *
+from utils.extent import *
+from utils.kdtree1 import *
+from utils.kdtree2b import *
+from utils.kfunction import *
 
 parser = argparse.ArgumentParser(description="Taking number of simulations")
 parser.add_argument('-sim', '--simulations', default=100,
